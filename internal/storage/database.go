@@ -161,7 +161,7 @@ func (db *Database) ListBlogs(ctx context.Context, groupName *string) ([]model.B
 		OrderBy("name")
 
 	if groupName != nil && *groupName != "" {
-		query = query.Where("LOWER(group_name) = LOWER(?)", *groupName)
+		query = query.Where(sq.Expr("LOWER(group_name) = LOWER(?)", *groupName))
 	}
 
 	rows, err := query.RunWith(db.conn).QueryContext(ctx)
@@ -393,7 +393,7 @@ func (db *Database) ListArticles(ctx context.Context, unreadOnly bool, blogID *i
 		query = query.Where("EXISTS (SELECT 1 FROM json_each(categories) WHERE LOWER(json_each.value) = LOWER(?))", *category)
 	}
 	if groupName != nil && *groupName != "" {
-		query = query.Where("blog_id IN (SELECT id FROM blogs WHERE LOWER(group_name) = LOWER(?))", *groupName)
+		query = query.Where(sq.Expr("blog_id IN (SELECT id FROM blogs WHERE LOWER(group_name) = LOWER(?))", *groupName))
 	}
 	if since != nil {
 		query = query.Where(sq.GtOrEq{"published_date": since.UTC().Format(sqliteWriteLayout)})
